@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 class UserProfileDetail extends StatelessWidget {
   final String userName;
@@ -9,8 +10,8 @@ class UserProfileDetail extends StatelessWidget {
   const UserProfileDetail({
     Key? key,
     this.userName = "Carlos Lopez",
-    this.userEmail = "carlos.lopez@gmail.com",
-    this.userPhotoUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150", required User user
+    this.userEmail = "carlitos@gmail.com",
+    this.userPhotoUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150",
   }) : super(key: key);
 
   @override
@@ -48,11 +49,11 @@ class UserProfileDetail extends StatelessWidget {
               ),
             ),
           ),
-          
+
           ListView(
             children: [
-              const SizedBox(height: 40.0), 
-              
+              const SizedBox(height: 40.0),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
@@ -97,7 +98,7 @@ class UserProfileDetail extends StatelessWidget {
               ),
 
               const SizedBox(height: 25.0),
-              
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
@@ -107,13 +108,17 @@ class UserProfileDetail extends StatelessWidget {
                     _buildActionButton(Icons.add, false, isBig: true),
                     _buildActionButton(Icons.exit_to_app, true, onTap: () {
                       print("Cerrar sesión");
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                     }),
                   ],
                 ),
               ),
 
               const SizedBox(height: 20.0),
-              
+
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -157,7 +162,7 @@ class UserProfileDetail extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildActionButton(IconData icon, bool isMini, {bool isBig = false, VoidCallback? onTap}) {
     return InkWell(
       onTap: onTap,
@@ -176,7 +181,7 @@ class UserProfileDetail extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildPlaceCard(String title, String description, String imageUrl) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20.0),
