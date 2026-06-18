@@ -9,7 +9,6 @@ class Review extends StatelessWidget {
 
   Review(this.pathFoto, this.textoNombreUsuario, this.textoResumenUsuario, this.cantidadEstrellas, this.textoComentario);
 
-
   @override
   Widget build(BuildContext context) {
     final foto =Container(

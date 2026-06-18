@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:places/home.dart';
 import 'package:places/places.dart';
 import 'package:places/places_cupertino.dart';
+import 'package:places/login_screen.dart';
 
 void main() {
   runApp(MainApp());
@@ -16,7 +17,7 @@ class MainApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity
       ),
-      home: PLacesCupertino(),
+      home: LoginScreen(),
     );
   }
 }
