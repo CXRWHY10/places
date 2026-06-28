@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class GradientBack extends StatelessWidget {
+  GradientBack(String s);
+
   @override
   Widget build(BuildContext context) {
     final gradiente = Container(

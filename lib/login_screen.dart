@@ -1,125 +1,162 @@
 import 'package:flutter/material.dart';
-import 'package:places/places_cupertino.dart';
-import 'gradient_back.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'places_cupertino.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+
+  Future<void> _iniciarSesion() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _mostrarMensaje('Por favor, llena todos los campos');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    const String url = 'http://52.202.196.13/api/login';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        String token = data['token'];
+
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+
+        _mostrarMensaje('¡Bienvenido, ${data['usuario']['nombres']}!');
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => PlacesCupertino()),
+          );
+        }
+      } else {
+        String mensajeError = data['mensaje'] ?? 'Error al iniciar sesión';
+        _mostrarMensaje(mensajeError);
+      }
+    } catch (e) {
+      _mostrarMensaje('No se pudo conectar con el servidor. ¿Olvidaste encender php artisan serve?');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _mostrarMensaje(String mensaje) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensaje)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
-      body: Stack(
-        children: [
-
-          SizedBox(
-            height: screenHeight,
-            width: screenWidth,
-            child: GradientBack(),
-          ),
-
-          Center(
-            child: Container(
-              width: screenWidth > 600 ? 450 : double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 30),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Bienvenido a Places",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Lato"
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    SizedBox(height: 40),
-                    _buildTextField("Email", Icons.email_outlined, false),
-                    SizedBox(height: 15),
-                    _buildTextField("Password", Icons.lock_outline, true),
-
-                    SizedBox(height: 30),
-
-                    _buildCustomButton(
-                        "Login",
-                        const [Color(0xFFa7ff84), Color(0xFF1cbb78)],
-                        Colors.white,
-                            () {
-
-                          print("Login presionado");
-
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => PLacesCupertino())
-                          );
-                        }
-                    ),
-
-                    SizedBox(height: 15),
-
-                    _buildCustomButton(
-                        "Login with Google",
-                        null,
-                        Colors.white,
-                            () => print("Google Login"),
-                        hasBorder: true
-                    ),
-                  ],
+      backgroundColor: Colors.white,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'PLACES',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Lato',
+                  fontSize: 40.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                  letterSpacing: 4.0,
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+              const SizedBox(height: 8.0),
+              const Text(
+                'Inicia sesión para continuar',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Lato',
+                  fontSize: 16.0,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 48.0),
 
-  Widget _buildTextField(String hintText, IconData icon, bool isPassword) {
-    return TextField(
-      obscureText: isPassword,
-      style: TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.white70),
-        hintText: hintText,
-        hintStyle: TextStyle(color: Colors.white60),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.15),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.white30),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.white),
-        ),
-      ),
-    );
-  }
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Correo electrónico',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              const SizedBox(height: 16.0),
 
-  Widget _buildCustomButton(String text, List<Color>? gradientColors, Color textColor, VoidCallback onTap, {bool hasBorder = false}) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        height: 50,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          gradient: gradientColors != null ? LinearGradient(colors: gradientColors) : null,
-          border: hasBorder ? Border.all(color: Colors.white, width: 1.2) : null,
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-                color: textColor,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: "Lato"
-            ),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Contraseña',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                ),
+              ),
+              const SizedBox(height: 24.0),
+
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                onPressed: _iniciarSesion,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: const Text(
+                  'INGRESAR',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

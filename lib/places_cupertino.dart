@@ -1,61 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:places/home.dart';
-import 'package:places/profile_places.dart';
-import 'package:places/search_places.dart';
+import 'home.dart';
+import 'search_places.dart';
+import 'profile_places.dart';
 
-class PLacesCupertino extends StatelessWidget {
+class PlacesCupertino extends StatefulWidget {
+  const PlacesCupertino({super.key});
+
+  @override
+  State<PlacesCupertino> createState() => _PlacesCupertinoState();
+}
+
+class _PlacesCupertinoState extends State<PlacesCupertino> {
+  int _indexTap = 0;
+
+  final List<Widget> _widgetsChildren = [
+    Myhome(),
+    SearchPlaces(),
+    const ProfilePlaces(),
+  ];
+
+  void onTapTapped(int index) {
+    setState(() {
+      _indexTap = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final places = Scaffold(
-      bottomNavigationBar: CupertinoTabScaffold(
-        tabBar: CupertinoTabBar(
-          backgroundColor: Colors.white.withAlpha(50),
-          items: [
-            BottomNavigationBarItem(
-              icon:  Icon(
-                Icons.home,
-                color: Color(0xFF574ACF)
-              )
-            ),
-            BottomNavigationBarItem(
-                icon:  Icon(
-                    Icons.search,
-                    color: Color(0xFF574ACF)
-                )
-            ),
-            BottomNavigationBarItem(
-                icon:  Icon(
-                    Icons.person,
-                    color: Color(0xFF574ACF)
-                )
-            ),
+    return Scaffold(
+      body: _widgetsChildren[_indexTap],
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.white,
+          primaryColor: Colors.purple,
+        ),
+        child: BottomNavigationBar(
+          onTap: onTapTapped,
+          currentIndex: _indexTap,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          selectedItemColor: Colors.deepPurple,
+          unselectedItemColor: Colors.grey,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
+            BottomNavigationBarItem(icon: Icon(Icons.search), label: ""),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
           ],
         ),
-        tabBuilder: (BuildContext context, int index){
-          CupertinoTabView cupertinoTabView = new CupertinoTabView();
-          switch(index){
-            case 0:
-              cupertinoTabView = CupertinoTabView(
-                builder: (BuildContext context) => Myhome(),
-              );
-              break;
-            case 1:
-              cupertinoTabView = CupertinoTabView(
-                builder: (BuildContext context) => SearchPlaces(),
-              );
-              break;
-            case 2:
-              cupertinoTabView = CupertinoTabView(
-                builder: (BuildContext context) => ProfilePlaces(),
-              );
-              break;
-          }
-
-          return cupertinoTabView;
-        }
       ),
     );
-    return places;
   }
 }

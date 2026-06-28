@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:places/home.dart';
-import 'package:places/places.dart';
-import 'package:places/places_cupertino.dart';
-import 'package:places/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'login_screen.dart';
+import 'places_cupertino.dart';
 
-void main() {
-  runApp(MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String? token = prefs.getString('auth_token');
+
+  final bool isLoggedIn = token != null && token.isNotEmpty;
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
-class MainApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Places",
+      title: 'Places App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity
+        primarySwatch: Colors.deepPurple,
+        fontFamily: 'Lato',
       ),
-      home: LoginScreen(),
+      home: isLoggedIn ? PlacesCupertino() : const LoginScreen(),
     );
   }
 }
