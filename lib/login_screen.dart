@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    const String url = 'http://52.202.196.13/api/login';
+    const String url = 'http://api.carlitos.lol/api/login';
 
     try {
       final response = await http.post(
